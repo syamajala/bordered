@@ -205,32 +205,40 @@ class Pdisk(PMC):
 
             mlen = [i for i in mlen if len(i) == 1]
 
-            ids = manager.dict(self.idem_dict(spinc))
+#            ids = manager.dict(self.idem_dict(spinc))
+            ids = self.idem_dict(spinc)
 
             args = [(self, i, ids, spinc) for i in strands]
-            ans = pool.map(alg_element, args, chunksize=1)
-            
+#            ans = pool.map(alg_element, args, chunksize=1)
+            ans = dtm.map(alg_element, args, chunksize=1)
+           
             for i in ans:
                 basis.extend(i)
 
-            mlen_ids = pool.map(self.compute_mlen_idem, mlen, chunksize=1)
-            mlen_ids = dict(mlen_ids)
+#            mlen_ids = pool.map(self.compute_mlen_idem, mlen, chunksize=1)
+#            mlen_ids = dict(mlen_ids)
+                mlen_ids = dtm.map(self.compute_mlen_idem, mlen, chunksize=1)
+                mlen_ids = dict(mlen_ids)
             
             args = [(self, i, ids, spinc) for i in mlen]
-            ans = pool.map(alg_element, args, chunksize=1)                                 
-                        
+#            ans = pool.map(alg_element, args, chunksize=1)                                 
+
+            ans = dtm.map(alg_element, args, chunksize=1)
+
             for i in ans:
                 for j in i:
                     if set(j.left_idem).intersection(set(mlen_ids[j.strands[0]])):
                         basis.append(j)                          
             
             args = [([], i) for i in self.idempotents()]
-            ans = pool.map(self.pstrand_diagram, args, chunksize=1)
-            
+#            ans = pool.map(self.pstrand_diagram, args, chunksize=1)
+
+            ans = dtm.map(self.pstrand_diagram, args, chunksize=1)
+
             basis.extend(ans)
             
-            pool.close()
-            pool.join()
+#            pool.close()
+#            pool.join()
             
         self.basis[spinc]= list(set(basis))
         self.basis_computed[spinc] = True
